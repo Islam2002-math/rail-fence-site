@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rail Fence - Déchiffrement</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050505;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 2rem 1.5rem 3rem;
+    }
+    .card {
+      background: #0f0f0f;
+      border-radius: 18px;
+      padding: 2rem 1.5rem 2.25rem;
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
+      border: 1px solid #ffffff15;
+    }
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .card-title {
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .back-link {
+      font-size: 0.85rem;
+      color: #bbbbbb;
+      text-decoration: none;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: #bbbbbb;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .form-group { margin-bottom: 1.2rem; }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+      color: #cccccc;
+    }
+    textarea,
+    input[type="number"] {
+      width: 100%;
+      padding: 0.7rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid #4b4b4b;
+      background: #050505;
+      color: #ffffff;
+      font-size: 0.95rem;
+      resize: vertical;
+    }
+    textarea:focus,
+    input:focus {
+      outline: none;
+      border-color: #9a9a9a;
+      box-shadow: 0 0 0 1px #9a9a9a55;
+    }
+    textarea { min-height: 110px; }
+    .inline-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .inline-group > div { flex: 1; min-width: 150px; }
+    .btn {
+      border: 1px solid #4b4b4b;
+      background: #2a2a2a;
+      color: #ffffff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .btn-primary {
+      background: #3a3a3a;
+      border-color: #5a5a5a;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      background: #404040;
+      box-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
+      border-color: #7a7a7a;
+    }
+    .btn-primary:hover {
+      background: #4a4a4a;
+      box-shadow: 0 0 16px rgba(0, 0, 0, 0.9);
+    }
+    .output {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 12px;
+      background: #060606;
+      border: 1px solid #ffffff22;
+      font-family: "Consolas", "Fira Code", monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .output-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      color: #aaaaaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="card">
+      <div class="title-row">
+        <h1 class="card-title">Déchiffrement Rail Fence</h1>
+        <a href="index.html" class="back-link">&larr; Retour à l'accueil</a>
+      </div>
+      <p class="card-subtitle">
+        Entrez le texte <strong>chiffré</strong> et le nombre de niveaux <strong>k</strong> utilisés
+        pour retrouver le texte d'origine.
+      </p>
+
+      <form id="decrypt-form">
+        <div class="form-group">
+          <label for="texte">Texte chiffré</label>
+          <textarea id="texte" name="texte" placeholder="Collez ici votre texte chiffré..."></textarea>
+        </div>
+
+        <div class="inline-group form-group">
+          <div>
+            <label for="k">Nombre de niveaux (k)</label>
+            <input type="number" id="k" name="k" min="2" value="3" />
+          </div>
+          <div style="text-align: right;">
+            <label>&nbsp;</label>
+            <button type="submit" class="btn btn-primary" id="submit-btn">
+              Déchiffrer le texte
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div class="output" id="output" style="display:none;">
+        <div class="output-title">Texte déchiffré</div>
+        <div id="output-text"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function genererPatternIndices(longueur, k) {
+      if (k <= 1) {
+        return Array(longueur).fill(0);
+      }
+      const indices = [];
+      let ligne = 0;
+      let direction = 1;
+      for (let i = 0; i < longueur; i++) {
+        indices.push(ligne);
+        if (ligne === 0) {
+          direction = 1;
+        } else if (ligne === k - 1) {
+          direction = -1;
+        }
+        ligne += direction;
+      }
+      return indices;
+    }
+
+    function railFenceDechiffrer(texteChiffre, k) {
+      if (k <= 1 || k >= texteChiffre.length) {
+        return texteChiffre;
+      }
+      const longueur = texteChiffre.length;
+      const pattern = genererPatternIndices(longueur, k);
+      const compteParLigne = Array(k).fill(0);
+      for (const ligne of pattern) {
+        compteParLigne[ligne]++;
+      }
+      const rails = [];
+      let index = 0;
+      for (let ligne = 0; ligne < k; ligne++) {
+        const count = compteParLigne[ligne];
+        const morceau = texteChiffre.slice(index, index + count);
+        rails.push(morceau.split(""));
+        index += count;
+      }
+      const positionsActuelles = Array(k).fill(0);
+      const resultat = [];
+      for (let i = 0; i < longueur; i++) {
+        const ligne = pattern[i];
+        const pos = positionsActuelles[ligne];
+        resultat.push(rails[ligne][pos]);
+        positionsActuelles[ligne]++;
+      }
+      return resultat.join("");
+    }
+
+    const form = document.getElementById("decrypt-form");
+    const output = document.getElementById("output");
+    const outputText = document.getElementById("output-text");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const texte = document.getElementById("texte").value;
+      const k = parseInt(document.getElementById("k").value, 10);
+      if (!texte.trim()) {
+        alert("Veuillez entrer un texte chiffré.");
+        return;
+      }
+      if (!Number.isInteger(k) || k <= 1) {
+        alert("Veuillez entrer une valeur de k entière supérieure à 1.");
+        return;
+      }
+      const resultat = railFenceDechiffrer(texte, k);
+      outputText.textContent = resultat;
+      output.style.display = "block";
+    });
+  </script>
+</body>
+</html>

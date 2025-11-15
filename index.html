@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rail Fence - Chiffrement / Déchiffrement</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050505;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* Section d'accueil (hero) */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .hero-text {
+      max-width: 500px;
+    }
+
+    .hero-title {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: #cccccc;
+      line-height: 1.6;
+    }
+
+    .hero-image {
+      width: 100%;
+      max-width: 900px;
+      height: 260px;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at top left, #444, #111);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .hero-image::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(135deg, rgba(0, 200, 255, 0.25), transparent),
+        linear-gradient(-135deg, rgba(255, 0, 128, 0.25), transparent);
+      mix-blend-mode: screen;
+    }
+
+    .hero-image-lines {
+      position: relative;
+      width: 90%;
+      height: 70%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rail-line {
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, #00d4ff, #ff00aa);
+      opacity: 0.3;
+    }
+
+    .rail-line:nth-child(1) { top: 10%; }
+    .rail-line:nth-child(2) { top: 30%; }
+    .rail-line:nth-child(3) { top: 50%; }
+    .rail-line:nth-child(4) { top: 70%; }
+    .rail-line:nth-child(5) { top: 90%; }
+
+    .hero-image-text {
+      position: relative;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Boutons principaux */
+    .mode-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid #4b4b4b;
+      background: #2a2a2a;
+      color: #ffffff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .btn-primary {
+      background: #3a3a3a;
+      border-color: #5a5a5a;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      background: #404040;
+      box-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
+      border-color: #7a7a7a;
+    }
+
+    .btn-primary:hover {
+      background: #4a4a4a;
+      box-shadow: 0 0 16px rgba(0, 0, 0, 0.9);
+    }
+
+    .btn-active {
+      border-color: #9a9a9a;
+      box-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Carte du formulaire */
+    .card {
+      background: #0f0f0f;
+      border-radius: 18px;
+      padding: 1.75rem 1.5rem 2rem;
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
+      border: 1px solid #ffffff15;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: #bbbbbb;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+      color: #cccccc;
+    }
+
+    textarea,
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.7rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid #ffffff33;
+      background: #050505;
+      color: #ffffff;
+      font-size: 0.95rem;
+      resize: vertical;
+    }
+
+    textarea:focus,
+    input:focus {
+      outline: none;
+      border-color: #00d4ff;
+      box-shadow: 0 0 0 1px #00d4ff55;
+    }
+
+    textarea {
+      min-height: 110px;
+    }
+
+    .inline-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .inline-group > div {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .output {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 12px;
+      background: #060606;
+      border: 1px solid #ffffff22;
+      font-family: "Consolas", "Fira Code", monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .output-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.35rem;
+      color: #aaaaaa;
+    }
+
+    .footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #777777;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .hero-title {
+        font-size: 1.8rem;
+      }
+      .hero-image {
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-text">
+        <h1 class="hero-title">Bonjour c'est BOUADJADJ Islam&nbsp;!</h1>
+        <p class="hero-subtitle">
+          Bienvenue sur ma démonstration du chiffrement <strong>Rail Fence</strong> à k niveaux.
+          Choisissez ce que vous voulez faire.
+        </p>
+
+        <div class="mode-buttons" style="margin-top: 2rem;">
+          <a href="chiffrement.html" class="btn btn-primary" style="min-width: 210px; text-align:center; font-weight:600;">
+            Continuer vers le chiffrement
+          </a>
+          <a href="dechiffrement.html" class="btn" style="min-width: 210px; text-align:center; font-weight:600;">
+            Continuer vers le déchiffrement
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <div class="hero-image-lines">
+          <div class="rail-line"></div>
+          <div class="rail-line"></div>
+          <div class="rail-line"></div>
+          <div class="rail-line"></div>
+          <div class="rail-line"></div>
+          <div class="hero-image-text">rail fence cipher</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Démonstration Rail Fence.
+    </div>
+  </div>
+</body>
+</html>
